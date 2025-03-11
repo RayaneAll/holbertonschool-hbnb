@@ -3,6 +3,9 @@ from datetime import datetime
 from app.models.place import Place
 from app.models.user import User
 from app.models.amenity import Amenity
+# from app.database import db  # Assurez-vous que votre gestion de DB est bien importée
+from flask_bcrypt import Bcrypt
+
 
 class Facade:
     def __init__(self):
@@ -47,17 +50,39 @@ class Facade:
         return self.users_db.get(user_id)
 
     def create_user(self, user_data):
-        """Créer un nouvel utilisateur"""
-        # Code de validation...
-        
+        """Créer un nouvel utilisateur avec hachage du mot de passe"""
+
+        bcrypt = Bcrypt()
+
+        # Vérifier si tous les champs requis sont présents
+        required_fields = ['first_name', 'last_name', 'email', 'password']
+        for field in required_fields:
+            if field not in user_data or not user_data[field].strip():
+                raise ValueError(f"{field} is required.")
+
+        # Vérifier que l'email est unique (optionnel selon la gestion de ta DB)
+        for existing_user in self.users_db.values():
+            if existing_user['email'] == user_data['email']:
+                raise ValueError("Email already exists.")
+
+        # Hacher le mot de passe avant de stocker l'utilisateur
+        hashed_password = bcrypt.generate_password_hash(user_data['password']).decode('utf-8')
+
+        # Créer l'utilisateur avec le mot de passe haché
         user = User(
             first_name=user_data['first_name'],
             last_name=user_data['last_name'],
             email=user_data['email'],
-            is_admin=user_data.get('is_admin', False)
+            is_admin=user_data.get('is_admin', False),
+            password=hashed_password  # Stocke le hash, pas le mot de passe en clair !
         )
-        
-        # S'assurer que tous les champs sont inclus dans le dictionnaire
+
+        # Sauvegarder dans la base de données (si DB persistante)
+        if hasattr(db, "session"):  # type: ignore # Vérifie si db est bien initialisé
+            db.session.add(user) # type: ignore
+            db.session.commit() # type: ignore
+
+        # S'assurer que le mot de passe ne soit pas retourné dans la réponse
         user_dict = {
             'id': user.id,
             'first_name': user.first_name,
@@ -67,8 +92,10 @@ class Facade:
             'created_at': user.created_at.isoformat() if hasattr(user.created_at, 'isoformat') else user.created_at,
             'updated_at': user.updated_at.isoformat() if hasattr(user.updated_at, 'isoformat') else user.updated_at
         }
-        
+
+        # Stocker l'utilisateur en mémoire (si stockage temporaire)
         self.users_db[user.id] = user_dict
+
         return user_dict
 
     def update_user(self, user_id, data):
