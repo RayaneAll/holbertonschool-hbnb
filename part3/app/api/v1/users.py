@@ -4,7 +4,7 @@ from werkzeug.exceptions import BadRequest
 
 api = Namespace('users', description='User operations')
 
-# Updated model with validation constraints AND proper examples
+# Updated model with validation constraints
 user_model = api.model('User', {
     'first_name': fields.String(
         required=True, 
@@ -24,7 +24,13 @@ user_model = api.model('User', {
         required=True, 
         description='Email of the user, must be in valid format',
         pattern=r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$',
-        example='john.doe@example.com'  # Add a clean example
+        example='john.doe@example.com'
+    ),
+    'password': fields.String(
+        required=True,
+        description='User password (hashed before storing)',
+        min_length=6,
+        example='SecurePassword123!'
     ),
     'is_admin': fields.Boolean(
         required=False, 
@@ -34,7 +40,7 @@ user_model = api.model('User', {
     )
 })
 
-# Complete response model including all fields
+# Response model (excluding password for security reasons)
 user_response_model = api.model('UserResponse', {
     'id': fields.String(description='User unique identifier'),
     'first_name': fields.String(description='First name of the user'),
@@ -48,19 +54,26 @@ user_response_model = api.model('UserResponse', {
 @api.route('/')
 class UserList(Resource):
     @api.doc('list_users')
-    @api.marshal_list_with(user_response_model, mask=False)  # Add mask=False here
+    @api.marshal_list_with(user_response_model, mask=False)
     def get(self):
         """List all users"""
         return facade.get_users()
 
     @api.doc('create_user')
     @api.expect(user_model)
-    @api.marshal_with(user_response_model, code=201, mask=False)  # Add mask=False here
+    @api.marshal_with(user_response_model, code=201, mask=False)
     @api.response(400, 'Validation Error')
     def post(self):
         """Create a new user"""
+        data = api.payload
+
+        # Ensure password is provided
+        if 'password' not in data or not data['password'].strip():
+            api.abort(400, "Password is required.")
+
         try:
-            return facade.create_user(api.payload), 201
+            user = facade.create_user(data)
+            return user, 201
         except ValueError as e:
             api.abort(400, str(e))
 
@@ -69,7 +82,7 @@ class UserList(Resource):
 @api.response(404, 'User not found')
 class User(Resource):
     @api.doc('get_user')
-    @api.marshal_with(user_response_model, mask=False)  # Add mask=False here
+    @api.marshal_with(user_response_model, mask=False)
     def get(self, user_id):
         """Get a user by ID."""
         user = facade.get_user(user_id)
@@ -79,7 +92,7 @@ class User(Resource):
 
     @api.doc('update_user')
     @api.expect(user_model)
-    @api.marshal_with(user_response_model, mask=False)  # Add mask=False here
+    @api.marshal_with(user_response_model, mask=False)
     @api.response(400, 'Validation Error')
     def put(self, user_id):
         """Update a user."""
