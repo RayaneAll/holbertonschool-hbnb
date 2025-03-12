@@ -1,5 +1,6 @@
 from flask_restx import Namespace, Resource, fields
 from app.services import facade
+from app.api.v1.decorators import admin_required  # Importe le décorateur
 
 api = Namespace('amenities', description='Amenity operations')
 
@@ -22,6 +23,8 @@ class AmenityList(Resource):
     @api.expect(amenity_model)
     @api.response(201, 'Amenity successfully created')
     @api.response(400, 'Invalid input data')
+    @api.response(403, 'Admin privileges required')
+    @admin_required()  # Ajoute le décorateur ici
     def post(self):
         """Register a new amenity"""
         data = api.payload
@@ -53,6 +56,8 @@ class AmenityResource(Resource):
     @api.response(200, 'Amenity updated successfully')
     @api.response(404, 'Amenity not found')
     @api.response(400, 'Invalid input data')
+    @api.response(403, 'Admin privileges required')
+    @admin_required()  # Ajoute le décorateur ici
     def put(self, amenity_id):
         """Update an amenity's information"""
         data = api.payload
