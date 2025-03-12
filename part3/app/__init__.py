@@ -13,7 +13,7 @@ def create_app(config_class="config.DevelopmentConfig"):
     app.config.from_object(config_class)  # Charger la configuration
 
     # Ajout de la clé secrète pour JWT (Assurez-vous que DevelopmentConfig la définit)
-    app.config["JWT_SECRET_KEY"] = "super-secret-key"  # À remplacer par une vraie clé sécurisée
+    app.config["JWT_SECRET_KEY"] = "dev-super-secret-key"  # À remplacer par une vraie clé sécurisée
 
     jwt.init_app(app)  # Initialiser JWT avec l'application Flask
 
