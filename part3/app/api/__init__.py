@@ -1,5 +1,7 @@
-# Importe d'abord les modules qui ne dépendent pas des autres
-from app.api import auth
-from app.api import users
-from app.api import places
-from app.api import reviews
+from flask import Blueprint
+
+# Définir le Blueprint localement
+bp = Blueprint('api', __name__)
+
+# Ne pas importer les modules ici pour éviter les importations circulaires
+# Ces importations seront faites dans create_app()

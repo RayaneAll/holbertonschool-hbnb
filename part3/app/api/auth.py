@@ -16,12 +16,24 @@ def login():
     if not user or not verify_password(data['password'], user.password_hash):
         return jsonify({"error": "Invalid email or password"}), 401
     
-    # Créer les tokens
-    access_token = create_access_token(identity=str(user.id))
-    refresh_token = create_refresh_token(identity=str(user.id))
+    # Ajouter le champ is_admin dans les claims du token
+    additional_claims = {
+        "is_admin": user.is_admin
+    }
+    
+    # Créer les tokens avec les claims supplémentaires
+    access_token = create_access_token(
+        identity=str(user.id),
+        additional_claims=additional_claims
+    )
+    refresh_token = create_refresh_token(
+        identity=str(user.id),
+        additional_claims=additional_claims
+    )
     
     return jsonify({
         "access_token": access_token,
         "refresh_token": refresh_token,
-        "user_id": str(user.id)
+        "user_id": str(user.id),
+        "is_admin": user.is_admin  # Optionnel: renvoyer aussi cette info au client
     }), 200
