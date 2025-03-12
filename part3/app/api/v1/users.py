@@ -1,6 +1,7 @@
 from flask_restx import Namespace, Resource, fields
 from app.services import facade
 from werkzeug.exceptions import BadRequest
+from app.api.v1.decorators import admin_required  # Importe le décorateur
 
 api = Namespace('users', description='User operations')
 
@@ -57,6 +58,8 @@ class UserList(Resource):
     @api.expect(user_model)
     @api.marshal_with(user_response_model, code=201, mask=False)  # Add mask=False here
     @api.response(400, 'Validation Error')
+    @api.response(403, 'Admin privileges required')
+    @admin_required()  # Ajoute le décorateur ici
     def post(self):
         """Create a new user"""
         try:
@@ -81,6 +84,8 @@ class User(Resource):
     @api.expect(user_model)
     @api.marshal_with(user_response_model, mask=False)  # Add mask=False here
     @api.response(400, 'Validation Error')
+    @api.response(403, 'Admin privileges required')
+    @admin_required()  # Ajoute le décorateur ici
     def put(self, user_id):
         """Update a user."""
         try:
