@@ -1,10 +1,12 @@
 from flask import Flask
 from flask_restx import Api
 from flask_jwt_extended import JWTManager
+from flask_sqlalchemy import SQLAlchemy  # Ajout de l'import SQLAlchemy
 from config import Config
 
 # Initialiser JWTManager en dehors de la fonction pour pouvoir l'importer ailleurs
 jwt = JWTManager()
+db = SQLAlchemy()  # Initialisation de SQLAlchemy
 
 def create_app(config_class=Config):
     app = Flask(__name__)
@@ -14,6 +16,9 @@ def create_app(config_class=Config):
     
     # Initialiser JWT
     jwt.init_app(app)
+    
+    # Initialiser SQLAlchemy
+    db.init_app(app)  # Ajout de cette ligne
     
     api = Api(
         app,
