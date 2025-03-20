@@ -1,5 +1,5 @@
 from flask_bcrypt import Bcrypt
-from app.persistence.repository import SQLAlchemyRepository
+from app.persistence.repository import UserRepository, SQLAlchemyRepository
 from app.models.user import User
 from app.models.place import Place
 from app.models.amenity import Amenity
@@ -8,7 +8,7 @@ from app.models.review import Review
 class Facade:
     def __init__(self):
         """Initialize repositories using SQLAlchemy."""
-        self.user_repo = SQLAlchemyRepository(User)
+        self.user_repo = UserRepository()  # Use specialized repository for users
         self.place_repo = SQLAlchemyRepository(Place)
         self.amenity_repo = SQLAlchemyRepository(Amenity)
         self.review_repo = SQLAlchemyRepository(Review)
@@ -29,6 +29,10 @@ class Facade:
     def get_user(self, user_id):
         """Retrieve a user by ID."""
         return self.user_repo.get(user_id)
+    
+    def get_user_by_email(self, email):
+        """Retrieve a user by email."""
+        return self.user_repo.get_user_by_email(email)
     
     def get_users(self):
         """Retrieve all users."""

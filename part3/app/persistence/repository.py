@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from app import db  # Import SQLAlchemy instance from the app
+from app.models.user import User
 
 class Repository(ABC):
     """Abstract base class defining the interface for data persistence operations."""
@@ -58,3 +59,12 @@ class SQLAlchemyRepository(Repository):
 
     def get_by_attribute(self, attr_name, attr_value):
         return self.model.query.filter_by(**{attr_name: attr_value}).first()
+
+class UserRepository(SQLAlchemyRepository):
+    """Repository for User-specific operations."""
+    def __init__(self):
+        super().__init__(User)
+
+    def get_user_by_email(self, email):
+        """Retrieve a user by email."""
+        return self.model.query.filter_by(email=email).first()
