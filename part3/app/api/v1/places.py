@@ -26,51 +26,16 @@ review_model = api.model('PlaceReview', {
 
 # Model for creating a place
 place_model = api.model('Place', {
-    'title': fields.String(
-        required=True,
-        description='Place title',
-        min_length=1,
-        max_length=100,
-        example='Apartment with sea view'
-    ),
-    'owner_id': fields.String(
-        required=True,
-        description='Owner identifier',
-        example='123e4567-e89b-12d3-a456-426614174000'
-    ),
-    'description': fields.String(
-        required=False,
-        description='Detailed place description',
-        example='Beautiful apartment with sea view...'
-    ),
-    'price': fields.Float(
-        required=False,
-        default=0.0,
-        description='Price per night (positive value)',
-        example=120.50
-    ),
-    'latitude': fields.Float(
-        required=False,
-        default=0.0,
-        description='Latitude (-90 to 90)',
-        example=43.296482
-    ),
-    'longitude': fields.Float(
-        required=False,
-        default=0.0,
-        description='Longitude (-180 to 180)',
-        example=5.369780
-    ),
-    'amenities': fields.List(
-        fields.String,
-        required=False,
-        description='List of amenity IDs',
-        example=['123e4567-e89b-12d3-a456-426614174000']
-    )
+    'title': fields.String(required=True, description='Place title', min_length=1, max_length=100, example='Apartment with sea view'),
+    'description': fields.String(required=False, description='Detailed place description', example='Beautiful apartment with sea view...'),
+    'price': fields.Float(required=False, default=0.0, description='Price per night (positive value)', example=120.50),
+    'latitude': fields.Float(required=False, default=0.0, description='Latitude (-90 to 90)', example=43.296482),
+    'longitude': fields.Float(required=False, default=0.0, description='Longitude (-180 to 180)', example=5.369780),
+    'amenities': fields.List(fields.String, required=False, description='List of amenity IDs', example=['123e4567-e89b-12d3-a456-426614174000'])
 })
 
 # Detailed place model
-place_detail_model = api.model('PlaceDetail', {
+place_response_model = api.model('PlaceResponse', {
     'id': fields.String(description='Place unique identifier'),
     'title': fields.String(description='Place title'),
     'description': fields.String(description='Place description'),
@@ -79,26 +44,10 @@ place_detail_model = api.model('PlaceDetail', {
     'longitude': fields.Float(description='Place longitude'),
     'owner': fields.Nested(user_model, description='Place owner'),
     'amenities': fields.List(fields.Nested(amenity_model), description='Available amenities'),
-    'reviews': fields.List(fields.Nested(review_model), description='Place reviews'),
     'created_at': fields.DateTime(description='Creation date'),
     'updated_at': fields.DateTime(description='Last update date')
 })
 
-# Model for creation/update response
-place_response_model = api.model('PlaceResponse', {
-    'id': fields.String(description='Place unique identifier'),
-    'title': fields.String(description='Place title'),
-    'description': fields.String(description='Place description'),
-    'price': fields.Float(description='Price per night'),
-    'latitude': fields.Float(description='Place latitude'),
-    'longitude': fields.Float(description='Place longitude'),
-    'amenities': fields.List(fields.Nested(amenity_model), description='List of amenities'),
-    'owner': fields.Nested(user_model, description='Place owner'),
-    'created_at': fields.DateTime(description='Creation date'),
-    'updated_at': fields.DateTime(description='Last update date')
-})
-
-# Ajout du décorateur @jwt_required() pour sécuriser la création des places
 @api.route('/')
 class PlaceList(Resource):
     @api.doc('list_places')
@@ -110,27 +59,22 @@ class PlaceList(Resource):
     @api.doc('create_place')
     @api.expect(place_model)
     @api.marshal_with(place_response_model, code=201, mask=False)
-    @api.response(400, 'Validation Error')
-    @jwt_required()  # ✅ Seul un utilisateur authentifié peut créer un lieu
+    @jwt_required()
     def post(self):
         """Create a new place"""
-        current_user = get_jwt_identity()  # ✅ Récupérer l'utilisateur authentifié
-        api.payload["owner_id"] = current_user["id"]  # ✅ Forcer l'ID du propriétaire
+        current_user = get_jwt_identity()
+        api.payload["owner_id"] = current_user["id"]
         
         try:
             return facade.create_place(api.payload), 201
         except ValueError as e:
             api.abort(400, str(e))
-        except Exception as e:
-            print(f"Unexpected error in POST /places/: {str(e)}")
-            api.abort(500, "Une erreur interne est survenue")
 
-# Sécurisation de la modification d'un lieu
 @api.route('/<string:place_id>')
 @api.param('place_id', 'Unique identifier for the place')
 class PlaceResource(Resource):
     @api.doc('get_place')
-    @api.marshal_with(place_detail_model, mask=False)
+    @api.marshal_with(place_response_model, mask=False)
     @api.response(404, 'Place not found')
     def get(self, place_id):
         """Get place details by ID"""
@@ -142,35 +86,41 @@ class PlaceResource(Resource):
     @api.doc('update_place')
     @api.expect(place_model)
     @api.marshal_with(place_response_model, mask=False)
-    @api.response(404, 'Place not found')
-    @api.response(400, 'Validation Error')
-    @jwt_required()  # ✅ Seul un utilisateur authentifié peut modifier un lieu
+    @jwt_required()
     def put(self, place_id):
-        """Update a place"""
-        current_user = get_jwt_identity()  # ✅ Récupérer l'utilisateur authentifié
+        """Update a place (Admins can modify any place)"""
+        current_user = get_jwt_identity()
+        is_admin = current_user.get("is_admin", False)
+        user_id = current_user.get("id")
+
         place = facade.get_place(place_id)
-        
         if place is None:
             api.abort(404, f"Place {place_id} not found")
 
-        if place["owner"]["id"] != current_user["id"]:  # ✅ Vérifier que l'utilisateur est le propriétaire
+        # Admins can modify any place, users only their own
+        if not is_admin and place["owner"]["id"] != user_id:
             api.abort(403, "Unauthorized action")
 
         try:
-            result = facade.update_place(place_id, api.payload)
-            return result
+            return facade.update_place(place_id, api.payload), 200
         except ValueError as e:
             api.abort(400, str(e))
 
-@api.route('/<string:place_id>/reviews')
-@api.param('place_id', 'The place identifier')
-class PlaceReviewList(Resource):
-    @api.response(200, 'List of reviews for the place retrieved successfully')
-    @api.response(404, 'Place not found')
-    def get(self, place_id):
-        """Get all reviews for a specific place"""
-        try:
-            reviews = facade.get_reviews_by_place(place_id)
-            return reviews, 200
-        except ValueError as e:
-            return {'message': str(e)}, 404
+    @api.doc('delete_place')
+    @jwt_required()
+    def delete(self, place_id):
+        """Delete a place (Admins can delete any place)"""
+        current_user = get_jwt_identity()
+        is_admin = current_user.get("is_admin", False)
+        user_id = current_user.get("id")
+
+        place = facade.get_place(place_id)
+        if place is None:
+            api.abort(404, f"Place {place_id} not found")
+
+        # Admins can delete any place, users only their own
+        if not is_admin and place["owner"]["id"] != user_id:
+            api.abort(403, "Unauthorized action")
+
+        facade.delete_place(place_id)
+        return {"message": "Place deleted successfully"}, 200
