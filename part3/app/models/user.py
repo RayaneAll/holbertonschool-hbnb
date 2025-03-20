@@ -1,6 +1,7 @@
 from app import db, bcrypt
 from .base_model import BaseModel
 import re
+from sqlalchemy.orm import relationship
 
 class User(BaseModel):
     """Represents a user in the system with SQLAlchemy integration."""
@@ -11,6 +12,10 @@ class User(BaseModel):
     email = db.Column(db.String(120), nullable=False, unique=True)
     password = db.Column(db.String(128), nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
+
+    # Relationships
+    places = relationship('Place', backref='user', lazy=True)
+    reviews = relationship('Review', backref='user', lazy=True)
 
     def __init__(self, first_name, last_name, email, password, is_admin=False, **kwargs):
         """Initialize a new User instance with validation and password hashing."""

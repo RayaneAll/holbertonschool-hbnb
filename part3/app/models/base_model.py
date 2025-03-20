@@ -20,10 +20,23 @@ class BaseModel(db.Model):
         db.session.delete(self)
         db.session.commit()
 
+    def update(self, **kwargs):
+        """Update model attributes dynamically from keyword arguments"""
+        for key, value in kwargs.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+        self.updated_at = datetime.utcnow()
+        self.save()
+
     def to_dict(self):
         """Return dictionary representation of the instance"""
         return {
             'id': self.id,
-            'created_at': self.created_at.isoformat(),
-            'updated_at': self.updated_at.isoformat()
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None
         }
+
+    @classmethod
+    def from_dict(cls, data):
+        """Create an instance from a dictionary"""
+        return cls(**data)
