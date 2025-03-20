@@ -1,6 +1,9 @@
 from abc import ABC, abstractmethod
 from app import db  # Import SQLAlchemy instance from the app
 from app.models.user import User
+from app.models.place import Place
+from app.models.review import Review
+from app.models.amenity import Amenity
 
 class Repository(ABC):
     """Abstract base class defining the interface for data persistence operations."""
@@ -60,6 +63,7 @@ class SQLAlchemyRepository(Repository):
     def get_by_attribute(self, attr_name, attr_value):
         return self.model.query.filter_by(**{attr_name: attr_value}).first()
 
+# --- SPECIFIC REPOSITORIES ---
 class UserRepository(SQLAlchemyRepository):
     """Repository for User-specific operations."""
     def __init__(self):
@@ -68,3 +72,18 @@ class UserRepository(SQLAlchemyRepository):
     def get_user_by_email(self, email):
         """Retrieve a user by email."""
         return self.model.query.filter_by(email=email).first()
+
+class PlaceRepository(SQLAlchemyRepository):
+    """Repository for Place-specific operations."""
+    def __init__(self):
+        super().__init__(Place)
+
+class ReviewRepository(SQLAlchemyRepository):
+    """Repository for Review-specific operations."""
+    def __init__(self):
+        super().__init__(Review)
+
+class AmenityRepository(SQLAlchemyRepository):
+    """Repository for Amenity-specific operations."""
+    def __init__(self):
+        super().__init__(Amenity)
