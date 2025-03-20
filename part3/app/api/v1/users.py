@@ -1,4 +1,5 @@
 from flask_restx import Namespace, Resource, fields
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.services import facade
 from werkzeug.exceptions import BadRequest
 
@@ -94,10 +95,22 @@ class User(Resource):
     @api.expect(user_model)
     @api.marshal_with(user_response_model, mask=False)
     @api.response(400, 'Validation Error')
+    @jwt_required()  # ✅ Seul l'utilisateur lui-même peut modifier son compte
     def put(self, user_id):
         """Update a user."""
+        current_user = get_jwt_identity()  # ✅ Récupérer l'utilisateur connecté
+
+        if current_user["id"] != user_id:
+            return {'message': "Unauthorized action"}, 403  # ✅ Vérification d'identité
+
+        user_data = api.payload
+
+        # ✅ Empêcher la modification de `email` et `password`
+        if "email" in user_data or "password" in user_data:
+            return {'message': "You cannot modify email or password."}, 400
+
         try:
-            user = facade.update_user(user_id, api.payload)
+            user = facade.update_user(user_id, user_data)
             if not user:
                 api.abort(404, f"User {user_id} not found")
             return user

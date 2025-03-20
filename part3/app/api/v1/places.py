@@ -1,4 +1,5 @@
 from flask_restx import Namespace, Resource, fields
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.services import facade
 
 api = Namespace('places', description='Places management')
@@ -97,6 +98,7 @@ place_response_model = api.model('PlaceResponse', {
     'updated_at': fields.DateTime(description='Last update date')
 })
 
+# Ajout du décorateur @jwt_required() pour sécuriser la création des places
 @api.route('/')
 class PlaceList(Resource):
     @api.doc('list_places')
@@ -109,8 +111,12 @@ class PlaceList(Resource):
     @api.expect(place_model)
     @api.marshal_with(place_response_model, code=201, mask=False)
     @api.response(400, 'Validation Error')
+    @jwt_required()  # ✅ Seul un utilisateur authentifié peut créer un lieu
     def post(self):
         """Create a new place"""
+        current_user = get_jwt_identity()  # ✅ Récupérer l'utilisateur authentifié
+        api.payload["owner_id"] = current_user["id"]  # ✅ Forcer l'ID du propriétaire
+        
         try:
             return facade.create_place(api.payload), 201
         except ValueError as e:
@@ -119,6 +125,7 @@ class PlaceList(Resource):
             print(f"Unexpected error in POST /places/: {str(e)}")
             api.abort(500, "Une erreur interne est survenue")
 
+# Sécurisation de la modification d'un lieu
 @api.route('/<string:place_id>')
 @api.param('place_id', 'Unique identifier for the place')
 class PlaceResource(Resource):
@@ -137,12 +144,20 @@ class PlaceResource(Resource):
     @api.marshal_with(place_response_model, mask=False)
     @api.response(404, 'Place not found')
     @api.response(400, 'Validation Error')
+    @jwt_required()  # ✅ Seul un utilisateur authentifié peut modifier un lieu
     def put(self, place_id):
         """Update a place"""
+        current_user = get_jwt_identity()  # ✅ Récupérer l'utilisateur authentifié
+        place = facade.get_place(place_id)
+        
+        if place is None:
+            api.abort(404, f"Place {place_id} not found")
+
+        if place["owner"]["id"] != current_user["id"]:  # ✅ Vérifier que l'utilisateur est le propriétaire
+            api.abort(403, "Unauthorized action")
+
         try:
             result = facade.update_place(place_id, api.payload)
-            if result is None:
-                api.abort(404, f"Place {place_id} not found")
             return result
         except ValueError as e:
             api.abort(400, str(e))
