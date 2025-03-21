@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from app import db  # Import SQLAlchemy instance from the app
+from flask_sqlalchemy import SQLAlchemy
+from app.extensions import db  # Import SQLAlchemy instance from the app
 from app.models.user import User
 from app.models.place import Place
 from app.models.review import Review

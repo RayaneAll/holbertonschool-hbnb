@@ -1,7 +1,6 @@
-from app import db, bcrypt
+from app.extensions import db, bcrypt
 from .base_model import BaseModel
 import re
-from sqlalchemy.orm import relationship
 
 class User(BaseModel):
     """Represents a user in the system with SQLAlchemy integration."""
@@ -13,37 +12,29 @@ class User(BaseModel):
     password = db.Column(db.String(128), nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
 
-    # Relationships
-    places = relationship('Place', backref='user', lazy=True)
-    reviews = relationship('Review', backref='user', lazy=True)
-
     def __init__(self, first_name, last_name, email, password, is_admin=False, **kwargs):
-        """Initialize a new User instance with validation and password hashing."""
         super().__init__(**kwargs)
 
-        # Validate input
         self.validate_first_name(first_name)
         self.validate_last_name(last_name)
         self.validate_email(email)
         self.validate_password(password)
 
-        # Assign values
         self.first_name = first_name
         self.last_name = last_name
         self.email = email.lower()
         self.is_admin = is_admin
-        self.hash_password(password)  # Hash the password
+        self.hash_password(password)
 
     def hash_password(self, password):
-        """Hashes the password before storing it."""
+        """Hashes the password using bcrypt."""
         self.password = bcrypt.generate_password_hash(password).decode('utf-8')
 
     def verify_password(self, password):
-        """Verifies if the provided password matches the hashed password."""
+        """Verify password hash."""
         return bcrypt.check_password_hash(self.password, password)
 
     def to_dict(self):
-        """Convert user instance to dictionary representation without exposing the password."""
         user_dict = super().to_dict()
         user_dict.update({
             'first_name': self.first_name,
@@ -55,7 +46,6 @@ class User(BaseModel):
 
     @staticmethod
     def validate_first_name(first_name):
-        """Validate first name."""
         if not first_name or first_name.strip() == "":
             raise ValueError("First name cannot be empty")
         if len(first_name) > 50:
@@ -63,7 +53,6 @@ class User(BaseModel):
 
     @staticmethod
     def validate_last_name(last_name):
-        """Validate last name."""
         if not last_name or last_name.strip() == "":
             raise ValueError("Last name cannot be empty")
         if len(last_name) > 50:
@@ -71,7 +60,6 @@ class User(BaseModel):
 
     @staticmethod
     def validate_email(email):
-        """Validate email format."""
         if not email or email.strip() == "":
             raise ValueError("Email cannot be empty")
         email_pattern = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
@@ -80,6 +68,5 @@ class User(BaseModel):
 
     @staticmethod
     def validate_password(password):
-        """Validate password presence."""
         if not password or password.strip() == "":
             raise ValueError("Password cannot be empty")
