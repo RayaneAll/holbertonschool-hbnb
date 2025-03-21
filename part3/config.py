@@ -1,36 +1,29 @@
 class Config:
-    """Base configuration class.
-    
-    Contains default configuration settings for the application.
-    All other configuration classes inherit from this class.
-    """
+    """Base configuration class."""
     DEBUG = False
     TESTING = False
-    SECRET_KEY = "your-default-secret-key"  # Clé secrète pour Flask
-    JWT_SECRET_KEY = "your-super-secret-key"  # Clé secrète pour JWT
+    SECRET_KEY = "your-default-secret-key"
+    JWT_SECRET_KEY = "your-super-secret-key"
+
+    # Common SQLAlchemy config
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 class DevelopmentConfig(Config):
-    """Development configuration settings.
-    
-    Used for local development with debugging enabled.
-    """
+    """Development configuration with debugging and DB setup."""
     DEBUG = True
-    SECRET_KEY = "dev-secret-key"  # Remplace par une clé plus sécurisée
-    JWT_SECRET_KEY = "dev-super-secret-key"  # Clé secrète pour JWT en dev
+    SECRET_KEY = "dev-secret-key"
+    JWT_SECRET_KEY = "dev-super-secret-key"
+    SQLALCHEMY_DATABASE_URI = "mysql://root@localhost/hbnb_dev_db"
 
 class TestingConfig(Config):
-    """Testing configuration settings.
-    
-    Used for running tests with testing mode enabled.
-    """
+    """Testing configuration with SQLite in-memory DB."""
     TESTING = True
     SECRET_KEY = "test-secret-key"
     JWT_SECRET_KEY = "test-super-secret-key"
+    SQLALCHEMY_DATABASE_URI = "sqlite:///test.db"
 
 class ProductionConfig(Config):
-    """Production configuration settings.
-    
-    Used for deployment in production environment.
-    """
+    """Production configuration (set strong secrets and proper DB URI)."""
     SECRET_KEY = "prod-secret-key"
-    JWT_SECRET_KEY = "prod-super-secret-key"  # Change cette clé en prod
+    JWT_SECRET_KEY = "prod-super-secret-key"
+    SQLALCHEMY_DATABASE_URI = "mysql://user:password@localhost/hbnb_prod_db"
