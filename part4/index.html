@@ -1,28 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>List of Places</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Places - HBnB</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="images/icon.png" type="image/png" />
 </head>
 <body>
-    <header>
-        <nav>
-            <a href="login.html" id="login-link">Login</a>
-        </nav>
-    </header>
-    <main>
-        <section id="filter">
-            <label for="price-filter">Max Price:</label>
-            <select id="price-filter">
-                <!-- Options will be populated dynamically -->
-            </select>
-        </section>
-        <section id="places-list">
-            <!-- List of places will be populated dynamically -->
-        </section>
-    </main>
-    <script src="scripts.js"></script>
+  <header>
+    <nav>
+      <img src="images/logo.png" alt="HBnB Logo" class="logo" />
+      <a href="index.html">Home</a>
+      <a href="login.html" class="login-button">Login</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="places-list">
+      <div class="place-card">
+        <h2>Cozy Loft</h2>
+        <p>$120 per night</p>
+        <a href="place.html" class="details-button">View Details</a>
+      </div>
+
+      <div class="place-card">
+        <h2>Beachfront Villa</h2>
+        <p>$250 per night</p>
+        <a href="place.html" class="details-button">View Details</a>
+      </div>
+
+      <div class="place-card">
+        <h2>Modern Apartment</h2>
+        <p>$95 per night</p>
+        <a href="place.html" class="details-button">View Details</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>All rights reserved © 2025</p>
+  </footer>
 </body>
 </html>
