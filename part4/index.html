@@ -12,34 +12,30 @@
     <nav>
       <img src="images/logo.png" alt="HBnB Logo" class="logo" />
       <a href="index.html">Home</a>
-      <a href="login.html" class="login-button">Login</a>
+      <a href="login.html" class="login-button" id="login-link">Login</a>
     </nav>
   </header>
 
   <main>
-    <section class="places-list">
-      <div class="place-card">
-        <h2>Cozy Loft</h2>
-        <p>$120 per night</p>
-        <a href="place.html" class="details-button">View Details</a>
-      </div>
+    <h1>Places</h1>
 
-      <div class="place-card">
-        <h2>Beachfront Villa</h2>
-        <p>$250 per night</p>
-        <a href="place.html" class="details-button">View Details</a>
-      </div>
+    <label for="price-filter">Filter by price:</label>
+    <select id="price-filter">
+      <option value="all">All</option>
+      <option value="10">Up to $10</option>
+      <option value="50">Up to $50</option>
+      <option value="100">Up to $100</option>
+    </select>
 
-      <div class="place-card">
-        <h2>Modern Apartment</h2>
-        <p>$95 per night</p>
-        <a href="place.html" class="details-button">View Details</a>
-      </div>
+    <section id="places-list" class="places-list">
+      <!-- Dynamically inserted place cards will go here -->
     </section>
   </main>
 
   <footer>
     <p>All rights reserved © 2025</p>
   </footer>
+
+  <script src="scripts.js"></script>
 </body>
 </html>
