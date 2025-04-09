@@ -1,85 +1,80 @@
 document.addEventListener('DOMContentLoaded', () => {
-  checkAuthentication();
+  const placeId = getPlaceIdFromURL();
+  const token = getCookie('token');
+  const loginLink = document.getElementById('login-link');
+  const addReviewSection = document.getElementById('add-review');
 
-  const priceFilter = document.getElementById('price-filter');
-  if (priceFilter) {
-    priceFilter.addEventListener('change', () => {
-      filterPlacesByPrice();
-    });
+  if (!token) {
+    if (loginLink) loginLink.style.display = 'block';
+    if (addReviewSection) addReviewSection.style.display = 'none';
+  } else {
+    if (loginLink) loginLink.style.display = 'none';
+    if (addReviewSection) addReviewSection.style.display = 'block';
   }
+
+  fetchPlaceDetails(token, placeId);
 });
 
-// --- Auth ---
+// --- Obtenir le token depuis les cookies ---
 function getCookie(name) {
   const value = `; ${document.cookie}`;
   const parts = value.split(`; ${name}=`);
   if (parts.length === 2) return parts.pop().split(';').shift();
 }
 
-function checkAuthentication() {
-  const token = getCookie('token');
-  const loginLink = document.getElementById('login-link');
-
-  if (!token) {
-    if (loginLink) loginLink.style.display = 'block';
-  } else {
-    if (loginLink) loginLink.style.display = 'none';
-    fetchPlaces(token);  // ✅ Appel uniquement si connecté
-  }
+// --- Extraire l’ID du lieu depuis l’URL ---
+function getPlaceIdFromURL() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get('id');
 }
 
-// --- Fetch + display places ---
-let allPlaces = [];
-
-async function fetchPlaces(token) {
+// --- Récupérer les détails du lieu ---
+async function fetchPlaceDetails(token, placeId) {
   try {
-    const response = await fetch('http://127.0.0.1:5000/api/v1/places', {
+    const response = await fetch(`http://127.0.0.1:5000/api/v1/places/${placeId}`, {
       method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {}
     });
 
     if (response.ok) {
       const data = await response.json();
-      allPlaces = data;
-      displayPlaces(data);
+      displayPlaceDetails(data);
     } else {
-      console.error('Failed to fetch places:', response.statusText);
+      console.error('Failed to fetch place details:', response.statusText);
     }
   } catch (error) {
-    console.error('Error fetching places:', error);
+    console.error('Error fetching place details:', error);
   }
 }
 
-function displayPlaces(places) {
-  const placesList = document.getElementById('places-list');
-  if (!placesList) return;
+// --- Affichage dynamique des détails du lieu ---
+function displayPlaceDetails(place) {
+  const detailsSection = document.getElementById('place-details');
+  const reviewsSection = document.getElementById('reviews');
 
-  placesList.innerHTML = ''; // Clear existing content
+  if (!detailsSection) return;
 
-  places.forEach(place => {
-    const card = document.createElement('div');
-    card.className = 'place-card';
-    card.setAttribute('data-price', place.price_per_night);
+  detailsSection.innerHTML = `
+    <h1>${place.name}</h1>
+    <div class="place-info">
+      <p><strong>Host:</strong> ${place.host || 'N/A'}</p>
+      <p><strong>Price:</strong> $${place.price_per_night} per night</p>
+      <p><strong>Description:</strong> ${place.description || 'No description'}</p>
+      <p><strong>Amenities:</strong> ${place.amenities?.join(', ') || 'None'}</p>
+    </div>
+  `;
 
-    card.innerHTML = `
-      <h2>${place.name}</h2>
-      <p>Price per night: $${place.price_per_night}</p>
-      <a href="place.html?id=${place.id}" class="details-button">View Details</a>
-    `;
-
-    placesList.appendChild(card);
-  });
-}
-
-// --- Filter ---
-function filterPlacesByPrice() {
-  const selected = document.getElementById('price-filter').value;
-  const maxPrice = selected === 'all' ? Infinity : parseInt(selected, 10);
-
-  document.querySelectorAll('.place-card').forEach(card => {
-    const price = parseFloat(card.getAttribute('data-price'));
-    card.style.display = price <= maxPrice ? 'block' : 'none';
-  });
+  // Reviews
+  if (reviewsSection && place.reviews) {
+    reviewsSection.innerHTML = '<h2>Reviews</h2>';
+    place.reviews.forEach(review => {
+      const reviewCard = document.createElement('div');
+      reviewCard.className = 'review-card';
+      reviewCard.innerHTML = `
+        <p><strong>${review.user}:</strong> ${review.comment}</p>
+        <p>Rating: ${'⭐'.repeat(review.rating)}</p>
+      `;
+      reviewsSection.appendChild(reviewCard);
+    });
+  }
 }
