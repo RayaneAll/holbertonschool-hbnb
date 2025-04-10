@@ -1,83 +1,175 @@
-# 🏠 HBnB - Simple Web Client
+# 🏠 HBNB - Holberton BnB
 
-> **Phase 4: Front-End Interface**  
-> _Built with 💙 HTML5, CSS3 & JavaScript ES6_
+## 🎯 Project Overview
+RESTful API for a Bed and Breakfast service built with Flask, implementing clean architecture patterns.
 
----
-
-## 📖 Overview
-
-Welcome to the **HBnB Web Client** — the front-end layer of the HBnB application, where users can log in, browse places, view details, and leave reviews — all in a seamless, interactive UI.
-
-This phase brings the project to life in the browser using modern web technologies, client-side logic, and API integration.
-
----
-
-## 🎯 Objectives
-
-- 🎨 Build a responsive and user-friendly interface from provided mockups.
-- 🔗 Connect to the existing back-end API using `fetch` and secure JWT-based authentication.
-- ⚙️ Enable client-side interactions and session management.
-- 🚀 Apply dynamic DOM manipulation to enhance UX without page reloads.
-
----
-
-## 📚 What You'll Learn
-
-- ✅ HTML5 semantic structuring
-- ✅ CSS3 styling and layouting
-- ✅ JavaScript ES6 syntax and best practices
-- ✅ Fetch API & handling asynchronous requests
-- ✅ Storing and reading cookies for sessions
-- ✅ Form validation and error feedback
-- ✅ Dealing with **CORS** in full-stack apps
-
----
-
-## 💡 Features
-
-### 🔐 User Authentication
-- JWT-based login system
-- Session handled with cookies
-- Auth-based UI changes (e.g. hide/show login button)
-
-### 🗺️ Places Listing
-- Fetch & display all available places from API
-- Render as responsive **cards** with name, price, and detail buttons
-- Live filtering by price range (10, 50, 100, All)
-
-### 🏡 Place Details
-- Load full data via place ID from URL
-- Display host info, amenities, description & reviews
-- Authenticated users can access the **Add Review** feature
-
-### ✍️ Add a Review
-- Auth-only access to submit reviews
-- Protected routes: unauthenticated users get redirected
-- POST review to the back-end with live feedback
-
----
-
-## ⚙️ Technologies Used
-
-- **HTML5**
-- **CSS3**
-- **JavaScript ES6**
-- **Fetch API**
-- **JWT & Cookies**
-- **REST API Integration**
-- **Client-side Form Validation**
-
----
-
-## 📂 Project Structure
-
+## 📁 Project Structure
 ```bash
-part4/
-├── index.html          # List of Places
-├── login.html          # Login Page
-├── place.html          # Place Details
-├── add_review.html     # Review Submission
-├── styles.css          # Shared styling
-├── scripts.js          # All JS logic here
-└── assets/             # Logo, icons, images
+part2/
+├── app/
+│   ├── api/v1/          # API endpoints
+│   │   ├── users.py
+│   │   ├── places.py
+│   │   ├── reviews.py
+│   │   └── amenities.py
+│   ├── models/          # Business logic
+│   │   ├── base_model.py
+│   │   ├── user.py
+│   │   ├── place.py
+│   │   ├── review.py
+│   │   └── amenity.py
+│   ├── services/        # Facade pattern
+│   └── persistence/     # Repository pattern
+├── run.py              
+└── requirements.txt    
+```
+
+## 🚀 Installation & Setup
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+## 🧩 Core Components
+
+### 1. 🔷 Base Model
+```python
+class BaseModel:
+    def __init__(self):
+        self.id = str(uuid.uuid4())
+        self.created_at = datetime.now()
+        self.updated_at = datetime.now()
+```
+
+### 2. 📦 Core Models
+- **User**
+  - Attributes: first_name, last_name, email, is_admin
+  - Validation: names ≤ 50 chars, unique email
+
+- **Place**
+  - Attributes: title, description, price, latitude, longitude
+  - Validation: title ≤ 100 chars, price > 0
+  - Relationships: belongs to User, has many Reviews, many Amenities
+
+- **Review**
+  - Attributes: text, rating (1-5), user_id, place_id
+  - Relationships: belongs to User and Place
+
+- **Amenity**
+  - Attributes: name (≤ 50 chars)
+  - Relationships: many-to-many with Place
+
+### 3. 🎭 Facade Pattern
+```python
+class HBnBFacade:
+    def __init__(self):
+        self.user_repo = InMemoryRepository()
+        self.place_repo = InMemoryRepository()
+        self.review_repo = InMemoryRepository()
+        self.amenity_repo = InMemoryRepository()
+
+    # Example methods
+    def create_user(self, user_data):
+        user = User(**user_data)
+        self.user_repo.add(user)
+        return user
+
+    def get_place_with_details(self, place_id):
+        place = self.place_repo.get(place_id)
+        if place:
+            place.owner = self.user_repo.get(place.owner_id)
+            place.reviews = self.review_repo.get_by_place(place_id)
+        return place
+```
+
+## 🔌 API Endpoints & Examples
+
+### 👥 User Management
+```bash
+# Create User
+POST /api/v1/users/
+{
+    "first_name": "John",
+    "last_name": "Doe",
+    "email": "john@example.com"
+}
+
+# Response
+{
+    "id": "uuid",
+    "first_name": "John",
+    "last_name": "Doe",
+    "email": "john@example.com"
+}
+```
+
+### 🏡 Place Management
+```bash
+# Create Place
+POST /api/v1/places/
+{
+    "title": "Cozy Apartment",
+    "description": "Nice stay",
+    "price": 100.0,
+    "latitude": 37.7749,
+    "longitude": -122.4194,
+    "owner_id": "user_uuid",
+    "amenities": ["amenity_uuid"]
+}
+
+# Get Place Details
+GET /api/v1/places/<place_id>
+Response includes: owner details, amenities, reviews
+```
+
+### ⭐ Review Management
+```bash
+# Create Review
+POST /api/v1/reviews/
+{
+    "text": "Great place!",
+    "rating": 5,
+    "user_id": "user_uuid",
+    "place_id": "place_uuid"
+}
+
+# Get Place Reviews
+GET /api/v1/places/<place_id>/reviews
+```
+
+### 🛋️ Amenity Management
+```bash
+# Create Amenity
+POST /api/v1/amenities/
+{
+    "name": "Wi-Fi"
+}
+
+# Get All Amenities
+GET /api/v1/amenities/
+```
+
+## 📊 Status Codes & Responses
+- 201: Resource Created
+- 200: Success
+- 404: Not Found
+- 400: Bad Request
+
+### 📝 Common Response Format
+```json
+{
+    "id": "uuid",
+    "created_at": "timestamp",
+    "updated_at": "timestamp",
+    ...resource specific fields...
+}
+```
+
+## 🏃‍♂️ Running the Application
+```bash
+python run.py  # Server starts at http://localhost:5000
+```
+
+---
+## 🌟 **Summary**: This project implements a comprehensive REST API for a BnB platform using Flask, featuring clean architecture with Facade and Repository patterns, managing users, places, reviews, and amenities through a well-structured endpoint system.

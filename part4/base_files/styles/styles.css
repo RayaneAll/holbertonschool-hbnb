@@ -1,0 +1,241 @@
+/* 
+  This is a SAMPLE File to get you started. Follow the instructions on the project to complete the tasks. 
+  You'll probably need to override some of theese styles.
+*/
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+/* First, update the html and body styles */
+html {
+    height: 100%;
+    position: relative;
+}
+
+body {
+    background-color: #f4f4f4;
+    color: #333;
+    min-height: 100vh; /* Modification clé (remplace height) */
+    display: flex; /* Flexbox activé */
+    flex-direction: column; /* Organisation verticale */
+    margin: 0;
+    padding: 0;
+}
+
+/* Header Styles (inchangé) */
+header {
+    background-color: #333;
+    color: #fff;
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    height: 50px;
+}
+
+/* Navigation (inchangé) */
+nav ul {
+    display: flex;
+    list-style: none;
+}
+
+nav ul li {
+    margin-right: 20px;
+}
+
+nav a {
+    color: #fff;
+    text-decoration: none;
+    margin-left: 1rem;
+}
+
+.login-button {
+    padding: 8px 15px;
+    background-color: #4CAF50;
+    color: white;
+    border-radius: 4px;
+    text-decoration: none;
+}
+
+/* Main Content - Modification cruciale */
+main {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+    flex: 1 0 auto; /* Nouvelle valeur flex (croissance obligatoire) */
+}
+
+/* Footer Styles - Modifications ciblées */
+footer {
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 1rem 0;
+    width: 100%; /* Garantit la largeur totale */
+    margin-top: auto; /* Pousse en bas */
+    flex-shrink: 0; /* Empêche le rétrécissement */
+    position: static; /* Annule tout positionnement absolu/fixed */
+}
+
+/* Tout le reste de votre CSS reste inchangé */
+.place-card {
+    background-color: white;
+    border-radius: 10px;
+    margin: 20px 0;
+    border: 1px solid #ddd;
+    overflow: hidden;
+}
+
+.place-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.place-info {
+    padding: 10px;
+}
+
+.price {
+    color: #FF5A5F;
+    font-weight: bold;
+    margin: 10px 0;
+}
+
+.details-button {
+    display: inline-block;
+    padding: 10px 15px;
+    background-color: #4CAF50;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    text-align: center;
+    width: 100%;
+}
+
+.places-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+}
+
+.place-details {
+    background-color: white;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+.review-card {
+    background-color: white;
+    border-radius: 10px;
+    padding: 10px;
+    margin: 20px 0;
+    border: 1px solid #ddd;
+}
+
+.add-review {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: white;
+    border-radius: 10px;
+}
+
+.form {
+    width: 100%;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.submit-btn, .cancel-btn {
+    padding: 10px 15px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.cancel-btn {
+    background-color: #ccc;
+    color: #333;
+}
+
+.login-container {
+    max-width: 500px;
+    margin: 50px auto;
+    padding: 30px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.login-btn {
+    margin-top: 1rem;
+    width: 100%;
+    padding: 12px;
+    background-color: #FF5A5F;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.login-btn:hover {
+    background-color: #ff3a3f;
+}
+
+@media (max-width: 768px) {
+    .places-container {
+        grid-template-columns: 1fr;
+    }
+    
+    header {
+        flex-direction: column;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
+.error-message {
+    color: #ff3860;
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+    text-align: center;
+}
