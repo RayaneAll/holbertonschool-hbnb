@@ -8,7 +8,7 @@
     <link rel="icon" href="../images/icon.png">
 </head>
 <body>
-    <!-- Header with logo and login button -->
+    <!-- Header -->
     <header>
         <div class="logo-container">
             <img src="../images/logo.png" alt="HBNB Logo" class="logo">
@@ -22,58 +22,58 @@
     </header>
 
     <main>
-        <h1>Places to Stay</h1>
-        
-        <!-- Price Filter Section -->
-        <section id="filter">
-            <label for="price-filter">Max Price:</label>
-            <select id="price-filter">
-                <option value="10">$10</option>
-                <option value="50">$50</option>
-                <option value="100">$100</option>
+        <h1>Available Places</h1>
+
+        <!-- Price Filter -->
+        <section id="filter" style="text-align: center; margin-bottom: 2rem;">
+            <label for="price-filter"><strong>Max Price:</strong></label>
+            <select id="price-filter" style="padding: 5px 10px; margin: 0 10px;">
                 <option value="all" selected>All</option>
+                <option value="200">$200</option>
+                <option value="150">$150</option>
+                <option value="100">$100</option>
             </select>
-            <button id="apply-filter" type="button">Apply Filter</button>
         </section>
-        
+
+        <!-- Places -->
         <section class="places-container" id="places-list">
-            <!-- Place Card 1 -->
+            <!-- Place 1 -->
             <article class="place-card">
-                <img src="../images/place1.jpg" alt="Cozy Apartment">
+                <img src="../images/place1.jpg" alt="Beautiful Beach House">
                 <div class="place-info">
-                    <h2>Cozy Apartment in Downtown</h2>
-                    <p class="price">$120 per night</p>
+                    <h2>Beautiful Beach House</h2>
+                    <p class="price">Price per night: $150</p>
                     <a href="place.html" class="details-button">View Details</a>
                 </div>
             </article>
 
-            <!-- Place Card 2 -->
+            <!-- Place 2 -->
             <article class="place-card">
-                <img src="../images/place2.jpg" alt="Beach House">
+                <img src="../images/place2.jpg" alt="Cozy Cabin">
                 <div class="place-info">
-                    <h2>Cozy Beach House</h2>
-                    <p class="price">$250 per night</p>
+                    <h2>Cozy Cabin</h2>
+                    <p class="price">Price per night: $100</p>
                     <a href="place.html" class="details-button">View Details</a>
                 </div>
             </article>
 
-            <!-- Place Card 3 -->
+            <!-- Place 3 -->
             <article class="place-card">
-                <img src="../images/place3.jpg" alt="Mountain Cabin">
+                <img src="../images/place3.jpg" alt="Modern Apartment">
                 <div class="place-info">
-                    <h2>Mountain View Cabin</h2>
-                    <p class="price">$180 per night</p>
+                    <h2>Modern Apartment</h2>
+                    <p class="price">Price per night: $200</p>
                     <a href="place.html" class="details-button">View Details</a>
                 </div>
             </article>
         </section>
     </main>
 
-    <!-- Footer with copyright text -->
+    <!-- Footer -->
     <footer>
-        <p>&copy; 2025 HBNB - All rights reserved</p>
+        <p>&copy; 2024 HBnB Evolution. All rights reserved.</p>
     </footer>
-    
+
     <script src="../scripts/scripts.js"></script>
 </body>
 </html>
