@@ -73,7 +73,7 @@ function checkAuthentication() {
 }
 
 async function fetchPlaces(token) {
-    const apiUrl = 'http://localhost:5000/api/v1/places';
+    const apiUrl = 'http://127.0.0.1:5000/api/v1/places';
     
     try {
         const headers = {
@@ -191,7 +191,7 @@ function handlePriceFilter(event) {
 }
 
 async function loginUser(email, password) {
-    const apiUrl = 'http://localhost:5000/api/v1/auth/login';
+    const apiUrl = 'http://127.0.0.1:5000/api/v1/auth/login';
     
     console.log('Attempting login with:', { email, url: apiUrl });
     
