@@ -274,3 +274,56 @@ footer {
         flex-direction: column;
     }
 }
+
+/* === Smooth Transitions === */
+button,
+a,
+input,
+select,
+textarea {
+    transition: all 0.3s ease;
+}
+
+/* === Hover effect on cards === */
+.place-card:hover,
+.review-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+/* === Button click animation === */
+button:active,
+.details-button:active,
+.login-btn:active,
+.submit-btn:active {
+    transform: scale(0.98);
+}
+
+/* === Focus effect on form inputs === */
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: #FF9800;
+    box-shadow: 0 0 0 2px rgba(255, 152, 0, 0.3);
+}
+
+/* === Fade-in animation === */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+main > section,
+.place-card,
+.review-card,
+.login-container,
+.add-review {
+    animation: fadeIn 0.6s ease forwards;
+}
